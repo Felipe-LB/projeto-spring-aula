@@ -5,6 +5,7 @@ import br.com.senac.projeto_spring_aula.livraria.LivroEntity;
 import br.com.senac.projeto_spring_aula.livraria.LivroPostDto;
 import br.com.senac.projeto_spring_aula.livraria.LivroRepository;
 import br.com.senac.projeto_spring_aula.todolist.model.ListaEntity;
+import br.com.senac.projeto_spring_aula.todolist.model.ListaStatus;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +25,7 @@ public class ProdutoController {
     private final ProdutoRepository produtoRepository;
 
     @PostMapping
-    public ResponseEntity<ProdutoEntity> criarProduto(@Valid @RequestBody ProdutoPostDto dto){
+    public ResponseEntity<ProdutoEntity> criarProduto(@Valid @RequestBody ProdutoDto dto){
         ProdutoEntity produto = new ProdutoEntity();
 
         produto.setNome(dto.nome());
@@ -55,6 +57,32 @@ public class ProdutoController {
                     .status(HttpStatus.OK)
                     .body(optionalProdutoEntity.get());
         }
+    }
+
+    @PatchMapping("/{id}/reabastecer")
+    @Transactional
+    public  ResponseEntity<ProdutoEntity> resupplyTask(@PathVariable int id,
+    @RequestParam int quantidade){
+        Optional<ProdutoEntity> optionalProduto = produtoRepository.findById(id);
+
+        if (optionalProduto.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        ProdutoEntity produtoEntity = optionalProduto.get();
+
+        produtoEntity.setQuantidadeEstoque(produtoEntity.getQuantidadeEstoque() + quantidade);
+
+        if (produtoEntity.getStatus().equals(ProdutoStatus.ESGOTADO)
+                && produtoEntity.getQuantidadeEstoque() > 0) {
+            produtoEntity.setStatus(ProdutoStatus.DISPONIVEL);
+        }
+
+
+
+        ProdutoEntity ProdutoAlterado = produtoRepository.save(produtoEntity);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ProdutoAlterado);
     }
 
     @DeleteMapping("/{id}")
