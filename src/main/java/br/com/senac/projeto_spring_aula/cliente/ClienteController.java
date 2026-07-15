@@ -1,6 +1,5 @@
 package br.com.senac.projeto_spring_aula.cliente;
 
-import br.com.senac.projeto_spring_aula.produtos.ProdutoEntity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -19,13 +19,22 @@ public class ClienteController {
     private final ClienteRepository clienteRepository;
 
     @PostMapping
-    public ResponseEntity<ClienteEntity> criarCliente(@Valid @RequestBody ClienteDto dto){
+    public ResponseEntity<?> criarCliente(@Valid @RequestBody ClienteDto dto){
+
         ClienteEntity cliente = new ClienteEntity();
 
         cliente.setNome(dto.nome());
         cliente.setEmail(dto.email());
         cliente.setCpf(dto.cpf());
         cliente.setDataCadastro(LocalDateTime.now());
+
+        Optional<ClienteEntity> byEmail = clienteRepository.findByEmail(dto.email());
+
+        if (byEmail.isPresent()) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Map.of("erro", "e-mail já cadastrado"));
+        }
 
         ClienteEntity clienteEntity = clienteRepository.save(cliente);
         return  ResponseEntity
