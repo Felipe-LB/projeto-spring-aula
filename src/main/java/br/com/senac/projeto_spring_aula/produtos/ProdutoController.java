@@ -1,19 +1,12 @@
 package br.com.senac.projeto_spring_aula.produtos;
 
 
-import br.com.senac.projeto_spring_aula.livraria.LivroEntity;
-import br.com.senac.projeto_spring_aula.livraria.LivroPostDto;
-import br.com.senac.projeto_spring_aula.livraria.LivroRepository;
-import br.com.senac.projeto_spring_aula.todolist.model.ListaEntity;
-import br.com.senac.projeto_spring_aula.todolist.model.ListaStatus;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +26,10 @@ public class ProdutoController {
         produto.setQuantidadeEstoque(dto.quantidadeEstoque());
         produto.setStatus(ProdutoStatus.DISPONIVEL);
 
-        ProdutoEntity produtoEntity = produtoRepository.save(produto);
+        ProdutoEntity saved = produtoRepository.save(produto);
         return  ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(produtoEntity);
+                .body(saved);
     }
 
     @GetMapping
@@ -48,25 +41,24 @@ public class ProdutoController {
     @GetMapping("/{id}")
     public ResponseEntity<ProdutoEntity> getById(@PathVariable int id) {
 
-        Optional<ProdutoEntity> optionalProdutoEntity = produtoRepository.findById(id);
+        Optional<ProdutoEntity> byId = produtoRepository.findById(id);
 
-        if (optionalProdutoEntity.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        if (byId.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } else {
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(optionalProdutoEntity.get());
+                    .body(byId.get());
         }
     }
 
     @PatchMapping("/{id}/reabastecer")
-    @Transactional
-    public  ResponseEntity<ProdutoEntity> resupplyTask(@PathVariable int id,
+    public  ResponseEntity<ProdutoEntity> resupplyProduct(@PathVariable int id,
     @RequestParam int quantidade){
         Optional<ProdutoEntity> optionalProduto = produtoRepository.findById(id);
 
         if (optionalProduto.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         ProdutoEntity produtoEntity = optionalProduto.get();
@@ -80,9 +72,9 @@ public class ProdutoController {
 
 
 
-        ProdutoEntity ProdutoAlterado = produtoRepository.save(produtoEntity);
+        ProdutoEntity produtoAlterado = produtoRepository.save(produtoEntity);
 
-        return ResponseEntity.status(HttpStatus.OK).body(ProdutoAlterado);
+        return ResponseEntity.ok(produtoAlterado);
     }
 
     @DeleteMapping("/{id}")

@@ -15,12 +15,11 @@ public class ClienteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(nullable = false)
     private String nome;
 
-    @Email
     @Column(nullable = false, unique = true)
     private String email;
 

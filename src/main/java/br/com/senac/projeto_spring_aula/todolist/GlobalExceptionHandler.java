@@ -1,4 +1,4 @@
-package br.com.senac.projeto_spring_aula;
+package br.com.senac.projeto_spring_aula.todolist;
 
 
 import org.springframework.http.ResponseEntity;

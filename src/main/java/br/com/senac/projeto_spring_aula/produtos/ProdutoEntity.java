@@ -16,7 +16,7 @@ public class ProdutoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(nullable = false)
     private String nome;
@@ -25,7 +25,7 @@ public class ProdutoEntity {
     private BigDecimal preco;
 
     @Column(nullable = false)
-    private int quantidadeEstoque;
+    private Integer quantidadeEstoque;
 
     @Enumerated(EnumType.STRING)
     private ProdutoStatus status;

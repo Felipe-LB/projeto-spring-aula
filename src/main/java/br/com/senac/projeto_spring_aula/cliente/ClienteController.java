@@ -2,6 +2,7 @@ package br.com.senac.projeto_spring_aula.cliente;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class ClienteController {
     private final ClienteRepository clienteRepository;
 
     @PostMapping
-    public ResponseEntity<?> criarCliente(@Valid @RequestBody ClienteDto dto){
+    public ResponseEntity<?> criarCliente(@Valid @RequestBody ClientePostDto dto){
 
         ClienteEntity cliente = new ClienteEntity();
 
@@ -30,16 +31,14 @@ public class ClienteController {
 
         Optional<ClienteEntity> byEmail = clienteRepository.findByEmail(dto.email());
 
-        if (byEmail.isPresent()) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(Map.of("erro", "e-mail já cadastrado"));
+        if (clienteRepository.existsByEmail(dto.email())) {
+            throw new DuplicateKeyException("O e-mail já existe!");
         }
 
-        ClienteEntity clienteEntity = clienteRepository.save(cliente);
+        ClienteEntity saved = clienteRepository.save(cliente);
         return  ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(clienteEntity);
+                .body(saved);
     }
 
     @GetMapping
@@ -49,7 +48,7 @@ public class ClienteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClienteEntity> getById(@PathVariable int id) {
+    public ResponseEntity<ClienteEntity> getById(@PathVariable Long id) {
 
         Optional<ClienteEntity> optionalClienteEntity = clienteRepository.findById(id);
 
@@ -63,7 +62,7 @@ public class ClienteController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteClient(@PathVariable int id) {
+    public ResponseEntity<Void> deleteClient(@PathVariable Long id) {
         clienteRepository.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
