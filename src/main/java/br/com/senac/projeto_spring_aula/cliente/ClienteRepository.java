@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface ClienteRepository extends JpaRepository<ClienteEntity, Long> {
 
     Optional<ClienteEntity> findByEmail(String email);
+
     @Query("SELECT c FROM ClienteEntity c WHERE c.email = :email")
+
     boolean existsByEmail(String email);
 }
